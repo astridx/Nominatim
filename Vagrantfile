@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider "hyperv" do |hv, override|
-    hv.memory = 2048
+    hv.memory = 8196
     hv.linked_clone = true
     if ENV['CHECKOUT'] != 'y' then
       override.vm.synced_folder ".", "/home/vagrant/Nominatim", type: "smb", smb_host: ENV['SMB_HOST'] || ENV['COMPUTERNAME']
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb, override|
     vb.gui = false
-    vb.memory = 2048
+    vb.memory = 8196
     vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//vagrant","0"]
     if ENV['CHECKOUT'] != 'y' then
       override.vm.synced_folder ".", "/home/vagrant/Nominatim"
@@ -36,14 +36,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "parallels" do |prl, override|
     prl.update_guest_tools = false
-    prl.memory = 2048
+    prl.memory = 8196
     if ENV['CHECKOUT'] != 'y' then
       override.vm.synced_folder ".", "/home/vagrant/Nominatim"
     end
   end
 
   config.vm.provider "libvirt" do |lv, override|
-    lv.memory = 2048
+    lv.memory = 8196
     lv.nested = true
     if ENV['CHECKOUT'] != 'y' then
       override.vm.synced_folder ".", "/home/vagrant/Nominatim", type: 'nfs', nfs_udp: false

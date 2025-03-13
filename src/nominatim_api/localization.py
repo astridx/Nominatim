@@ -7,9 +7,13 @@
 """
 Helper functions for localizing names of results.
 """
-from typing import Mapping, List, Optional
+from typing import Mapping, List, Optional, Union
+from .logging import log
+from .config import Configuration
+from pathlib import Path
 
 import re
+import json
 
 
 class Locales:
@@ -19,15 +23,34 @@ class Locales:
         usage.
     """
 
-    def __init__(self, langs: Optional[List[str]] = None):
+    def __init__(self, langs: Optional[List[str]] = None, project_dir: Optional[Union[str, Path]] = None,
+                 environ: Optional[Mapping[str, str]] = None):
+        self.config = Configuration(project_dir, environ)
         self.languages = langs or []
+
+        try:
+            self.output_names_config = self.config.load_sub_configuration('', config='OUTPUT_NAMES_CONFIG')
+        except KeyError:
+            self.output_names_config = json.loads('{"prio1": {"with_lang": "name,brand,fallback", "without_lang": "name"}, "prio2": {"with_lang": "official_name,short_name,ref", "without_lang": "official_name,short_name"}}')
+
         self.name_tags: List[str] = []
 
+        log().var_dump('Output name tags list 1', self.name_tags)
+
+        log().section('<h1>Localization</h1>')
+        log().var_dump('Output names', self.output_names_config)
+
+        for prio in self.output_names_config:
+            for lang_key in self.output_names_config[prio]:
+                self.output_names_config[prio][lang_key] = self.output_names_config[prio][lang_key].split(",")
+
         # Build the list of supported tags. It is currently hard-coded.
-        self._add_lang_tags('name')
-        self._add_tags('name', 'brand')
-        self._add_lang_tags('official_name', 'short_name')
-        self._add_tags('official_name', 'short_name', 'ref')
+        self._add_lang_tags(*self.output_names_config["prio1"]["with_lang"])
+        self._add_tags(*self.output_names_config["prio1"]["without_lang"])
+        self._add_lang_tags(*self.output_names_config["prio2"]["with_lang"])
+        self._add_tags(*self.output_names_config["prio2"]["without_lang"])
+
+        log().var_dump('Output name tags list 2', self.name_tags)
 
     def __bool__(self) -> bool:
         return len(self.languages) > 0
@@ -91,3 +114,22 @@ class Locales:
                 languages.append(parts[0])
 
         return Locales(languages)
+
+
+        #
+        # langs=[] => 
+        # ['name', '_place_name', 'brand', '_place_brand', 
+        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']
+        #
+        # langs=['en'] => 
+        # ['name:en', '_place_name:en', 
+        # 'name', '_place_name', 'brand', '_place_brand', 
+        # 'official_name:en', '_place_official_name:en', 'short_name:en', '_place_short_name:en', 
+        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']
+        #
+        # langs=['en', 'de'] => 
+        # ['name:en', '_place_name:en', 'name:de', '_place_name:de',
+        # 'name', '_place_name', 'brand', '_place_brand', 
+        # 'official_name:en', '_place_official_name:en', 'short_name:en', '_place_short_name:en', 
+        # 'official_name:de', '_place_official_name:de', 'short_name:de', '_place_short_name:de',
+        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']

@@ -36,14 +36,35 @@ is.
       ```
       # inside the virtual machine:
       cd nominatim-project
-      wget --no-verbose --output-document=monaco.osm.pbf http://download.geofabrik.de/europe/monaco-latest.osm.pbf
-      nominatim import --osm-file monaco.osm.pbf 2>&1 | tee monaco.$$.log
+
+
+        curl -o cda.osm 'https://overpass-api.de/api/map?bbox=-1.373574,37.720376,-1.342984,37.746525'
+        ~/nominatim-venv/bin/nominatim import --osm-file cda.osm 2>&1 | tee cda.$$.log
+
+      wget --no-verbose --output-document=murcia.osm.pbf https://download.geofabrik.de/europe/spain/murcia-latest.osm.pbf
+      ~/nominatim-venv/bin/nominatim import --osm-file murcia.osm.pbf 2>&1 | tee murcia.$$.log
       ```
 
     To repeat an import you'd need to delete the database first
 
         dropdb --if-exists nominatim
 
+
+
+
+
+---
+SELECT tags
+FROM planet_osm_nodes
+WHERE tags::text LIKE '%entrance%';
+
+select name from placex WHERE name::text LIKE '%Condado%';
+---
+
+export NOMINATIM_OUTPUT_NAMES="name:XX,name,brand,official_name:XX,short_name:XX,official_name,short_name,ref"
+
+---
+cat /proc/self/environ | tr '\0' '\n' 
 
 
 ## Development

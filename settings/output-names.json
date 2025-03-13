@@ -1,0 +1,10 @@
+{
+    "prio1": {
+        "with_lang": "name",
+        "without_lang": "name,brand,config"
+    },
+    "prio2": {
+        "with_lang": "official_name,short_name",
+        "without_lang": "official_name,short_name,ref"
+    }
+}
