@@ -8,7 +8,6 @@
 Helper functions for localizing names of results.
 """
 import re
-import json
 
 from pathlib import Path
 from typing import Mapping, List, Optional, Union
@@ -29,17 +28,9 @@ class Locales:
         self.config = Configuration(project_dir, environ)
         self.languages = langs or []
 
-        try:
-            self.output_names_config = (
-                self.config.load_sub_configuration('', config='OUTPUT_NAMES_CONFIG')
-            )
-        except KeyError:
-            self.output_names_config = (
-                json.loads("""{"prio1": {"with_lang": "name,brand,fallback",
-                             "without_lang": "name"},
-                             "prio2": {"with_lang": "official_name,short_name,ref",
-                             "without_lang": "official_name,short_name"}}""")
-            )
+        self.output_names_config = (
+            self.config.load_sub_configuration('output-names.json')
+        )
 
         self.name_tags: List[str] = []
 
@@ -47,12 +38,6 @@ class Locales:
 
         log().section('<h1>Localization</h1>')
         log().var_dump('Output names', self.output_names_config)
-
-        for prio in self.output_names_config:
-            for lang_key in self.output_names_config[prio]:
-                self.output_names_config[prio][lang_key] = (
-                    self.output_names_config[prio][lang_key].split(",")
-                )
 
         # Build the list of supported tags. It is currently hard-coded.
         self._add_lang_tags(*self.output_names_config["prio1"]["with_lang"])

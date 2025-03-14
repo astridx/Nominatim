@@ -66,6 +66,13 @@ export NOMINATIM_OUTPUT_NAMES="name:XX,name,brand,official_name:XX,short_name:XX
 ---
 cat /proc/self/environ | tr '\0' '\n' 
 
+---
+nominatim search --format debug --limit 1 --addressdetails --country PL --city Ben --street 'Ben 7'  
+
+---
+
+pytest test/python
+
 
 ## Development
 
