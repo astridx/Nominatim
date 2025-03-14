@@ -34,10 +34,8 @@ class Locales:
 
         self.name_tags: List[str] = []
 
-        log().var_dump('Output name tags list 1', self.name_tags)
-
         log().section('<h1>Localization</h1>')
-        log().var_dump('Output names', self.output_names_config)
+        log().var_dump('Output names config', self.output_names_config)
 
         # Build the list of supported tags. It is currently hard-coded.
         self._add_lang_tags(*self.output_names_config["prio1"]["with_lang"])
@@ -45,7 +43,7 @@ class Locales:
         self._add_lang_tags(*self.output_names_config["prio2"]["with_lang"])
         self._add_tags(*self.output_names_config["prio2"]["without_lang"])
 
-        log().var_dump('Output name tags list 2', self.name_tags)
+        log().var_dump('Output name tags list', self.name_tags)
 
     def __bool__(self) -> bool:
         return len(self.languages) > 0
