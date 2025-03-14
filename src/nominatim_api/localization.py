@@ -7,13 +7,13 @@
 """
 Helper functions for localizing names of results.
 """
+import re
+import json
+
+from pathlib import Path
 from typing import Mapping, List, Optional, Union
 from .logging import log
 from .config import Configuration
-from pathlib import Path
-
-import re
-import json
 
 
 class Locales:
@@ -23,15 +23,23 @@ class Locales:
         usage.
     """
 
-    def __init__(self, langs: Optional[List[str]] = None, project_dir: Optional[Union[str, Path]] = None,
+    def __init__(self, langs: Optional[List[str]] = None,
+                 project_dir: Optional[Union[str, Path]] = None,
                  environ: Optional[Mapping[str, str]] = None):
         self.config = Configuration(project_dir, environ)
         self.languages = langs or []
 
         try:
-            self.output_names_config = self.config.load_sub_configuration('', config='OUTPUT_NAMES_CONFIG')
+            self.output_names_config = (
+                self.config.load_sub_configuration('', config='OUTPUT_NAMES_CONFIG')
+            )
         except KeyError:
-            self.output_names_config = json.loads('{"prio1": {"with_lang": "name,brand,fallback", "without_lang": "name"}, "prio2": {"with_lang": "official_name,short_name,ref", "without_lang": "official_name,short_name"}}')
+            self.output_names_config = (
+                json.loads("""{"prio1": {"with_lang": "name,brand,fallback",
+                             "without_lang": "name"},
+                             "prio2": {"with_lang": "official_name,short_name,ref",
+                             "without_lang": "official_name,short_name"}}""")
+            )
 
         self.name_tags: List[str] = []
 
@@ -42,7 +50,9 @@ class Locales:
 
         for prio in self.output_names_config:
             for lang_key in self.output_names_config[prio]:
-                self.output_names_config[prio][lang_key] = self.output_names_config[prio][lang_key].split(",")
+                self.output_names_config[prio][lang_key] = (
+                    self.output_names_config[prio][lang_key].split(",")
+                )
 
         # Build the list of supported tags. It is currently hard-coded.
         self._add_lang_tags(*self.output_names_config["prio1"]["with_lang"])
@@ -114,22 +124,3 @@ class Locales:
                 languages.append(parts[0])
 
         return Locales(languages)
-
-
-        #
-        # langs=[] => 
-        # ['name', '_place_name', 'brand', '_place_brand', 
-        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']
-        #
-        # langs=['en'] => 
-        # ['name:en', '_place_name:en', 
-        # 'name', '_place_name', 'brand', '_place_brand', 
-        # 'official_name:en', '_place_official_name:en', 'short_name:en', '_place_short_name:en', 
-        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']
-        #
-        # langs=['en', 'de'] => 
-        # ['name:en', '_place_name:en', 'name:de', '_place_name:de',
-        # 'name', '_place_name', 'brand', '_place_brand', 
-        # 'official_name:en', '_place_official_name:en', 'short_name:en', '_place_short_name:en', 
-        # 'official_name:de', '_place_official_name:de', 'short_name:de', '_place_short_name:de',
-        # 'official_name', '_place_official_name', 'short_name', '_place_short_name', 'ref', '_place_ref']
