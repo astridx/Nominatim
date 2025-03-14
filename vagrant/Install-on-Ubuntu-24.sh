@@ -23,6 +23,9 @@ export DEBIAN_FRONTEND=noninteractive #DOCS:
     sudo apt-get install -y osm2pgsql postgresql-postgis postgresql-postgis-scripts \
                             pkg-config libicu-dev virtualenv git
 
+# Now install a package needed for running tests:
+
+    sudo apt-get install -y libsqlite3-mod-spatialite
 
 #
 # System Configuration
@@ -150,6 +153,16 @@ fi                                 #DOCS:
 $USERHOME/nominatim-venv/bin/pip install falcon uvicorn gunicorn
 cd $USERHOME/Nominatim
 $USERHOME/nominatim-venv/bin/pip install packaging/nominatim-api
+#DOCS:```
+
+
+
+# To install all dev packages, run:
+
+#DOCS:```sh
+$USERHOME/nominatim-venv/bin/pip install psutil psycopg[binary] PyICU SQLAlchemy \
+    python-dotenv jinja2 pyYAML behave \
+    mkdocs mkdocstrings mkdocs-gen-files pytest pytest-asyncio flake8 types-jinja2 types-markupsafe types-psutil types-psycopg2 types-pygments types-pyyaml types-requests types-ujson types-urllib3 typing-extensions unicorn falcon starlette uvicorn mypy osmium aiosqlite
 #DOCS:```
 
 # Next you need to create a systemd job that runs Nominatim on gunicorn.
